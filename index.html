@@ -52,10 +52,9 @@
 
   <script>
     function processTranscript() {
-      console.clear(); // לנקות את הקונסול בכל לחיצה
+      console.clear(); // מנקה את הקונסול
       console.log("התחלת עיבוד...");
 
-      // קבלת התמלול והמידע על הדוברים מהטפסים
       const transcript = document.getElementById("transcript").value.trim();
       const speakers = document.getElementById("speakers").value.trim();
 
@@ -73,12 +72,12 @@
 
       // עיבוד המידע על הדוברים
       const speakerEntries = speakers.split('\n').map(line => {
-        const match = line.match(/\[(.*?)\] (.*?) (SPEAKER_\d+)/);
+        const match = line.match(/\[\s*(.*?)\s*-->\s*(.*?)\]\s+(.*?)\s+(SPEAKER_\d+)/);
         if (match) {
           return {
             start: match[1],
             end: match[2],
-            speaker: match[3]
+            speaker: match[4]
           };
         }
         return null;
@@ -103,7 +102,7 @@
       console.log("שורות התמלול לאחר עיבוד:");
       console.log(transcriptLines);
 
-      // שילוב התמלול עם המידע על הדוברים
+      // שילוב המידע על הדוברים עם התמלול
       let output = '';
       transcriptLines.forEach(line => {
         const speaker = speakerEntries.find(
