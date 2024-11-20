@@ -119,8 +119,11 @@
         const speaker = speakerEntries.find(
           s => line.start >= s.start && line.start <= s.end
         );
-        const speakerLabel = speaker ? speaker.speaker : 'דובר לא מזוהה';
-        output += `${speakerLabel}: ${line.text}\n`;
+        if (speaker) {
+          output += `${speaker.speaker}: ${line.text}\n`;
+        } else {
+          output += `דובר לא מזוהה: ${line.text}\n`;
+        }
       });
 
       console.log("תוצאה סופית:");
