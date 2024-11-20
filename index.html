@@ -51,6 +51,11 @@
   <div id="output"></div>
 
   <script>
+    function parseTimecodeToSeconds(timecode) {
+      const [hours, minutes, seconds] = timecode.split(':').map(part => parseFloat(part.replace(',', '.')));
+      return hours * 3600 + minutes * 60 + seconds;
+    }
+
     function processTranscript() {
       console.clear();
       console.log("התחלת עיבוד...");
@@ -75,8 +80,8 @@
         const match = line.match(/\[\s*(.*?)\s*-->\s*(.*?)\]\s+(.*?)\s+(SPEAKER_\d+)/);
         if (match) {
           return {
-            start: match[1],
-            end: match[2],
+            start: parseTimecodeToSeconds(match[1]),
+            end: parseTimecodeToSeconds(match[2]),
             speaker: match[4]
           };
         }
@@ -91,8 +96,8 @@
         const match = line.match(/^\d+\s+(\d{2}:\d{2}:\d{2},\d{3}) --> (\d{2}:\d{2}:\d{2},\d{3})\s+(.*)/);
         if (match) {
           return {
-            start: match[1],
-            end: match[2],
+            start: parseTimecodeToSeconds(match[1]),
+            end: parseTimecodeToSeconds(match[2]),
             text: match[3]
           };
         }
@@ -108,20 +113,14 @@
       console.log("שורות התמלול לאחר עיבוד:");
       console.log(transcriptLines);
 
-      // הפיכת הרשימות כך שהבדיקה תהיה מהסוף להתחלה
-      speakerEntries.reverse();
-      transcriptLines.reverse();
-
-      // שילוב המידע על הדוברים עם התמלול
+      // התאמת התמלול לדוברים
       let output = '';
       transcriptLines.forEach(line => {
         const speaker = speakerEntries.find(
-          s => line.start <= s.end && line.end >= s.start
+          s => line.start >= s.start && line.start <= s.end
         );
-        const speakerLabel = speaker ? speaker.speaker : 'דובר לא ידוע';
-        output = `${speakerLabel}: ${line.text}\n` + output;
-        console.log(`שורה מעובדת: ${line.text}`);
-        console.log(`דובר: ${speakerLabel}`);
+        const speakerLabel = speaker ? speaker.speaker : 'דובר לא מזוהה';
+        output += `${speakerLabel}: ${line.text}\n`;
       });
 
       console.log("תוצאה סופית:");
