@@ -52,7 +52,7 @@
 
   <script>
     function parseTimecodeToSeconds(timecode) {
-      const [hours, minutes, seconds] = timecode.split(':').map(part => Math.floor(parseFloat(part.replace(',', '.'))));
+      const [hours, minutes, seconds] = timecode.split(':').map(part => parseFloat(part.replace(',', '.')));
       return hours * 3600 + minutes * 60 + seconds;
     }
 
@@ -62,14 +62,18 @@
 
       speakerEntries.forEach(entry => {
         if (!currentSpeaker || currentSpeaker.speaker !== entry.speaker) {
-          if (currentSpeaker) grouped.push(currentSpeaker);
+          if (currentSpeaker && currentSpeaker.end > currentSpeaker.start) {
+            grouped.push(currentSpeaker);
+          }
           currentSpeaker = { speaker: entry.speaker, start: entry.start, end: entry.end };
         } else {
           currentSpeaker.end = entry.end;
         }
       });
 
-      if (currentSpeaker) grouped.push(currentSpeaker);
+      if (currentSpeaker && currentSpeaker.end > currentSpeaker.start) {
+        grouped.push(currentSpeaker);
+      }
       return grouped;
     }
 
@@ -86,12 +90,6 @@
         return;
       }
 
-      console.log("תמלול שהוזן:");
-      console.log(transcript);
-
-      console.log("מידע על הדוברים שהוזן:");
-      console.log(speakers);
-
       // עיבוד המידע על הדוברים
       const speakerEntries = speakers.split('\n').map(line => {
         const match = line.match(/\[\s*(.*?)\s*-->\s*(.*?)\]\s+(.*?)\s+(SPEAKER_\d+)/);
@@ -106,7 +104,6 @@
       }).filter(Boolean);
 
       const groupedSpeakers = groupSpeakerIntervals(speakerEntries);
-
       console.log("רשימת הדוברים לאחר קיבוץ:");
       console.log(groupedSpeakers);
 
