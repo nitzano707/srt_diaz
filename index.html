@@ -52,7 +52,7 @@
 
   <script>
     function parseTimecodeToSeconds(timecode) {
-      const [hours, minutes, seconds] = timecode.split(':').map(part => parseFloat(part.replace(',', '.')));
+      const [hours, minutes, seconds] = timecode.split(':').map(part => Math.floor(parseFloat(part.replace(',', '.'))));
       return hours * 3600 + minutes * 60 + seconds;
     }
 
@@ -93,7 +93,7 @@
 
       // עיבוד התמלול
       const transcriptLines = transcript.split('\n').map(line => {
-        const match = line.match(/^\d+\s+(\d{2}:\d{2}:\d{2},\d{3}) --> (\d{2}:\d{2}:\d{2},\d{3})\s+(.*)/);
+        const match = line.match(/^\d+\s+(\d{2}:\d{2}:\d{2}),\d{3} --> (\d{2}:\d{2}:\d{2}),\d{3}\s+(.*)/);
         if (match) {
           return {
             start: parseTimecodeToSeconds(match[1]),
