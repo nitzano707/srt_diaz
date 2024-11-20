@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="he">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,6 +7,8 @@
   <style>
     body {
       font-family: Arial, sans-serif;
+      direction: rtl;
+      text-align: right;
       margin: 20px;
     }
     textarea {
@@ -15,8 +17,6 @@
       margin-bottom: 20px;
     }
     button {
-      display: block;
-      margin: 20px 0;
       padding: 10px 20px;
       background-color: #4CAF50;
       color: white;
@@ -27,11 +27,11 @@
       background-color: #45a049;
     }
     #output {
-      white-space: pre-wrap;
-      background: #f9f9f9;
-      padding: 10px;
-      border: 1px solid #ccc;
       margin-top: 20px;
+      padding: 10px;
+      background-color: #f9f9f9;
+      border: 1px solid #ccc;
+      white-space: pre-wrap;
     }
   </style>
 </head>
@@ -40,22 +40,38 @@
   <h1>עיבוד תמלול עם חלוקה לדוברים</h1>
 
   <label for="transcript">הכנס תמלול:</label>
-  <textarea id="transcript" placeholder="הכנס את התמלול כאן..."></textarea>
+  <textarea id="transcript" placeholder="הכנס כאן את התמלול..."></textarea>
 
   <label for="speakers">הכנס מידע על הדוברים:</label>
-  <textarea id="speakers" placeholder="הכנס את המידע על הדוברים כאן..."></textarea>
+  <textarea id="speakers" placeholder="הכנס כאן את המידע על הדוברים..."></textarea>
 
   <button onclick="processTranscript()">עבד והצג</button>
 
-  <h2>תמלול עם חלוקה לדוברים:</h2>
+  <h2>תוצאה:</h2>
   <div id="output"></div>
 
   <script>
     function processTranscript() {
-      const transcript = document.getElementById("transcript").value;
-      const speakers = document.getElementById("speakers").value;
+      console.clear(); // לנקות את הקונסול בכל לחיצה
+      console.log("התחלת עיבוד...");
 
-      // Parse speaker data
+      // קבלת התמלול והמידע על הדוברים מהטפסים
+      const transcript = document.getElementById("transcript").value.trim();
+      const speakers = document.getElementById("speakers").value.trim();
+
+      if (!transcript || !speakers) {
+        document.getElementById("output").textContent = "אנא הכנס גם תמלול וגם מידע על הדוברים.";
+        console.error("אחד או שני השדות ריקים!");
+        return;
+      }
+
+      console.log("תמלול שהוזן:");
+      console.log(transcript);
+
+      console.log("מידע על הדוברים שהוזן:");
+      console.log(speakers);
+
+      // עיבוד המידע על הדוברים
       const speakerEntries = speakers.split('\n').map(line => {
         const match = line.match(/\[(.*?)\] (.*?) (SPEAKER_\d+)/);
         if (match) {
@@ -68,7 +84,10 @@
         return null;
       }).filter(Boolean);
 
-      // Parse transcript into lines
+      console.log("רשימת הדוברים לאחר עיבוד:");
+      console.log(speakerEntries);
+
+      // עיבוד התמלול
       const transcriptLines = transcript.split('\n').map(line => {
         const match = line.match(/(\d+)\s+(\d{2}:\d{2}:\d{2},\d{3}) --> (\d{2}:\d{2}:\d{2},\d{3})\s+(.*)/);
         if (match) {
@@ -81,17 +100,26 @@
         return null;
       }).filter(Boolean);
 
-      // Combine data into a formatted transcript
+      console.log("שורות התמלול לאחר עיבוד:");
+      console.log(transcriptLines);
+
+      // שילוב התמלול עם המידע על הדוברים
       let output = '';
       transcriptLines.forEach(line => {
         const speaker = speakerEntries.find(
           s => line.start >= s.start && line.end <= s.end
         );
-        const speakerLabel = speaker ? speaker.speaker : 'Unknown Speaker';
+        const speakerLabel = speaker ? speaker.speaker : 'דובר לא ידוע';
         output += `${speakerLabel}: ${line.text}\n`;
+
+        console.log(`שורה מעובדת: ${line.text}`);
+        console.log(`דובר: ${speakerLabel}`);
       });
 
-      // Display the output
+      console.log("תוצאה סופית:");
+      console.log(output);
+
+      // הצגת התוצאה
       document.getElementById("output").textContent = output;
     }
   </script>
