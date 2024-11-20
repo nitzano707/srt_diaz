@@ -93,7 +93,7 @@
 
       // עיבוד התמלול
       const transcriptLines = transcript.split('\n').map(line => {
-        const match = line.match(/^\d+\s+(\d{2}:\d{2}:\d{2}),\d{3} --> (\d{2}:\d{2}:\d{2}),\d{3}\s+(.*)/);
+        const match = line.match(/^\d+\s+(\d{2}:\d{2}:\d{2},\d{3}) --> (\d{2}:\d{2}:\d{2},\d{3})\s+(.*)/);
         if (match) {
           return {
             start: parseTimecodeToSeconds(match[1]),
@@ -117,7 +117,7 @@
       let output = '';
       transcriptLines.forEach(line => {
         const speaker = speakerEntries.find(
-          s => line.start >= s.start && line.start <= s.end
+          s => line.start >= s.start - 1 && line.start <= s.end + 1 // התאמה גמישה לטווחי זמן
         );
         if (speaker) {
           output += `${speaker.speaker}: ${line.text}\n`;
