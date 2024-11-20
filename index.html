@@ -52,7 +52,7 @@
 
   <script>
     function processTranscript() {
-      console.clear(); // מנקה את הקונסול
+      console.clear();
       console.log("התחלת עיבוד...");
 
       const transcript = document.getElementById("transcript").value.trim();
@@ -102,15 +102,18 @@
       console.log("שורות התמלול לאחר עיבוד:");
       console.log(transcriptLines);
 
+      // הפיכת הרשימות כך שהבדיקה תהיה מהסוף להתחלה
+      speakerEntries.reverse();
+      transcriptLines.reverse();
+
       // שילוב המידע על הדוברים עם התמלול
       let output = '';
       transcriptLines.forEach(line => {
         const speaker = speakerEntries.find(
-          s => line.start >= s.start && line.end <= s.end
+          s => line.start <= s.end && line.end >= s.start
         );
         const speakerLabel = speaker ? speaker.speaker : 'דובר לא ידוע';
-        output += `${speakerLabel}: ${line.text}\n`;
-
+        output = `${speakerLabel}: ${line.text}\n` + output;
         console.log(`שורה מעובדת: ${line.text}`);
         console.log(`דובר: ${speakerLabel}`);
       });
