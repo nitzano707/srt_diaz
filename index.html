@@ -56,6 +56,23 @@
       return hours * 3600 + minutes * 60 + seconds;
     }
 
+    function groupSpeakerIntervals(speakerEntries) {
+      const grouped = [];
+      let currentSpeaker = null;
+
+      speakerEntries.forEach(entry => {
+        if (!currentSpeaker || currentSpeaker.speaker !== entry.speaker) {
+          if (currentSpeaker) grouped.push(currentSpeaker);
+          currentSpeaker = { speaker: entry.speaker, start: entry.start, end: entry.end };
+        } else {
+          currentSpeaker.end = entry.end;
+        }
+      });
+
+      if (currentSpeaker) grouped.push(currentSpeaker);
+      return grouped;
+    }
+
     function processTranscript() {
       console.clear();
       console.log("התחלת עיבוד...");
@@ -88,8 +105,10 @@
         return null;
       }).filter(Boolean);
 
-      console.log("רשימת הדוברים לאחר עיבוד:");
-      console.log(speakerEntries);
+      const groupedSpeakers = groupSpeakerIntervals(speakerEntries);
+
+      console.log("רשימת הדוברים לאחר קיבוץ:");
+      console.log(groupedSpeakers);
 
       // עיבוד התמלול
       const transcriptLines = transcript.split('\n').map(line => {
@@ -116,8 +135,8 @@
       // התאמת התמלול לדוברים
       let output = '';
       transcriptLines.forEach(line => {
-        const speaker = speakerEntries.find(
-          s => line.start >= s.start - 1 && line.start <= s.end + 1 // התאמה גמישה לטווחי זמן
+        const speaker = groupedSpeakers.find(
+          s => line.start >= s.start && line.start <= s.end
         );
         if (speaker) {
           output += `${speaker.speaker}: ${line.text}\n`;
