@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>עיבוד תמלול עם חלוקה לדוברים</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    textarea {
+      width: 100%;
+      height: 150px;
+      margin-bottom: 20px;
+    }
+    button {
+      display: block;
+      margin: 20px 0;
+      padding: 10px 20px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    #output {
+      white-space: pre-wrap;
+      background: #f9f9f9;
+      padding: 10px;
+      border: 1px solid #ccc;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>עיבוד תמלול עם חלוקה לדוברים</h1>
+
+  <label for="transcript">הכנס תמלול:</label>
+  <textarea id="transcript" placeholder="הכנס את התמלול כאן..."></textarea>
+
+  <label for="speakers">הכנס מידע על הדוברים:</label>
+  <textarea id="speakers" placeholder="הכנס את המידע על הדוברים כאן..."></textarea>
+
+  <button onclick="processTranscript()">עבד והצג</button>
+
+  <h2>תמלול עם חלוקה לדוברים:</h2>
+  <div id="output"></div>
+
+  <script>
+    function processTranscript() {
+      const transcript = document.getElementById("transcript").value;
+      const speakers = document.getElementById("speakers").value;
+
+      // Parse speaker data
+      const speakerEntries = speakers.split('\n').map(line => {
+        const match = line.match(/\[(.*?)\] (.*?) (SPEAKER_\d+)/);
+        if (match) {
+          return {
+            start: match[1],
+            end: match[2],
+            speaker: match[3]
+          };
+        }
+        return null;
+      }).filter(Boolean);
+
+      // Parse transcript into lines
+      const transcriptLines = transcript.split('\n').map(line => {
+        const match = line.match(/(\d+)\s+(\d{2}:\d{2}:\d{2},\d{3}) --> (\d{2}:\d{2}:\d{2},\d{3})\s+(.*)/);
+        if (match) {
+          return {
+            start: match[2],
+            end: match[3],
+            text: match[4]
+          };
+        }
+        return null;
+      }).filter(Boolean);
+
+      // Combine data into a formatted transcript
+      let output = '';
+      transcriptLines.forEach(line => {
+        const speaker = speakerEntries.find(
+          s => line.start >= s.start && line.end <= s.end
+        );
+        const speakerLabel = speaker ? speaker.speaker : 'Unknown Speaker';
+        output += `${speakerLabel}: ${line.text}\n`;
+      });
+
+      // Display the output
+      document.getElementById("output").textContent = output;
+    }
+  </script>
+
+</body>
+</html>
